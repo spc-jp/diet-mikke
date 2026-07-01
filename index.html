@@ -815,6 +815,73 @@
   .quote-title { font-size: 11px; font-weight: 700; color: var(--amber); margin-bottom: 3px; }
   .quote-text { font-size: 13.5px; color: var(--text); line-height: 1.6; }
 
+  /* ===== 今日のやることリスト ===== */
+  .checklist-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    border: 0.5px solid var(--border);
+  }
+  .checklist-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .checklist-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .checklist-progress {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 3px 10px;
+    border-radius: 99px;
+  }
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 2px;
+    cursor: pointer;
+    border-bottom: 0.5px solid var(--border);
+    transition: opacity 0.15s;
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item:active { opacity: 0.7; }
+  .checklist-check {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+    color: transparent;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .checklist-item.done .checklist-check {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+  .checklist-label { font-size: 14px; color: var(--text); font-weight: 500; flex: 1; }
+  .checklist-item.done .checklist-label {
+    color: var(--text-hint);
+    text-decoration: line-through;
+  }
+  .checklist-arrow { font-size: 16px; color: var(--text-hint); }
+  .checklist-item.done .checklist-arrow { visibility: hidden; }
+  .checklist-complete-msg {
+    display: none;
+    text-align: center;
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 700;
+    padding-top: 10px;
+  }
+
   /* ===== ストリーク：カウントアップ用 ===== */
   .streak-num { transition: none; }
 
@@ -1023,6 +1090,17 @@
     </div>
     <div class="content">
 
+      <div class="section" id="checklist-section" style="display:none;">
+        <div class="checklist-card">
+          <div class="checklist-header">
+            <span class="checklist-title">✅ 今日のやること</span>
+            <span class="checklist-progress" id="checklist-progress">0/2</span>
+          </div>
+          <div class="checklist-items" id="checklist-items"></div>
+          <div class="checklist-complete-msg" id="checklist-complete-msg">🎉 今日のやること、コンプリートです！</div>
+        </div>
+      </div>
+
       <div class="section" id="plan-banner-section" style="display:none;">
         <div class="plan-banner">
           <div class="plan-banner-top">
@@ -1082,8 +1160,8 @@
             <div class="summary-unit" id="today-mood-label">まあまあ</div>
             <div class="summary-label">💭 体調</div>
           </div>
-          <div class="summary-item">
-            <div class="summary-val">4</div>
+          <div class="summary-item" id="water-summary" style="cursor:pointer;" onclick="logWaterCup()">
+            <div class="summary-val" id="summary-water-val">4</div>
             <div class="summary-unit">杯</div>
             <div class="summary-label">💧 水分</div>
           </div>
@@ -1707,6 +1785,8 @@
   function saveMood() {
     document.getElementById('today-mood-icon').textContent = selectedMood.emoji;
     document.getElementById('today-mood-label').textContent = selectedMood.label;
+    localStorage.setItem('dietMikkeMoodDoneDate', todayStr());
+    renderChecklist(currentSegKey);
     showToast('体調を記録しました！');
     setTimeout(() => switchTab('home'), 800);
   }
@@ -1819,6 +1899,8 @@
     const dt = document.getElementById('record-datetime').textContent;
     document.getElementById('photo-result').style.display = 'none';
     showToast(`✅ ${dt} ${mealLabel}を記録しました！（624 kcal）`);
+    localStorage.setItem('dietMikkeMealDoneDate', todayStr());
+    renderChecklist(currentSegKey);
     recordStreakOnConfirm();
     setTimeout(() => switchTab('home'), 900);
   }
@@ -2133,6 +2215,7 @@
   }
 
   function applySegment(key) {
+    currentSegKey = key;
     const seg = SEGMENTS[key] || SEGMENTS.default;
     document.getElementById('plan-banner-section').style.display = 'block';
     document.getElementById('plan-banner-badge').textContent = seg.badge;
@@ -2180,6 +2263,7 @@
     });
 
     renderDailyQuote(seg);
+    renderChecklist(key);
   }
 
   /* ===== 今日の一言（セグメント別・日替わり） ===== */
@@ -2202,6 +2286,70 @@
     const quote = quotes[seed % quotes.length];
     document.getElementById('daily-quote-text').textContent = quote;
     document.getElementById('quote-section').style.display = 'block';
+  }
+
+  /* ===== 今日のやることリスト ===== */
+  let currentSegKey = 'default';
+  const AGE_80_90_KEYS = ['female_80_90', 'male_80_90'];
+
+  function getChecklistItems(segKey) {
+    const items = [
+      { key: 'meal', icon: '🍽️', label: '食事を記録する', action: () => switchTab('record') },
+      { key: 'mood', icon: '💭', label: '体調を記録する',   action: () => switchTab('mood') },
+    ];
+    if (AGE_80_90_KEYS.includes(segKey)) {
+      items.push({ key: 'water', icon: '💧', label: '水分を記録する', action: () => logWaterCup() });
+    }
+    return items;
+  }
+
+  function isChecklistItemDone(key) {
+    const today = todayStr();
+    if (key === 'meal')  return localStorage.getItem('dietMikkeMealDoneDate') === today;
+    if (key === 'mood')  return localStorage.getItem('dietMikkeMoodDoneDate') === today;
+    if (key === 'water') {
+      const w = JSON.parse(localStorage.getItem('dietMikkeWater') || 'null');
+      return !!(w && w.date === today && w.count > 0);
+    }
+    return false;
+  }
+
+  function renderChecklist(segKey) {
+    currentSegKey = segKey;
+    const items = getChecklistItems(segKey);
+    const container = document.getElementById('checklist-items');
+    container.innerHTML = '';
+    let doneCount = 0;
+
+    items.forEach(item => {
+      const done = isChecklistItemDone(item.key);
+      if (done) doneCount++;
+      const row = document.createElement('div');
+      row.className = 'checklist-item' + (done ? ' done' : '');
+      row.innerHTML =
+        '<div class="checklist-check">' + (done ? '✓' : '') + '</div>' +
+        '<div class="checklist-label">' + item.icon + ' ' + item.label + '</div>' +
+        '<div class="checklist-arrow">›</div>';
+      row.addEventListener('click', item.action);
+      container.appendChild(row);
+    });
+
+    document.getElementById('checklist-progress').textContent = doneCount + '/' + items.length;
+    document.getElementById('checklist-section').style.display = 'block';
+
+    const msgEl = document.getElementById('checklist-complete-msg');
+    msgEl.style.display = (doneCount === items.length) ? 'block' : 'none';
+  }
+
+  function logWaterCup() {
+    const today = todayStr();
+    let w = JSON.parse(localStorage.getItem('dietMikkeWater') || 'null');
+    if (!w || w.date !== today) w = { date: today, count: 0 };
+    w.count += 1;
+    localStorage.setItem('dietMikkeWater', JSON.stringify(w));
+    document.getElementById('summary-water-val').textContent = w.count;
+    showToast('💧 水分を記録しました（' + w.count + '杯目）');
+    renderChecklist(currentSegKey);
   }
 
   /* ===== 目標達成グロー（カロリーが目標内の日はリングが光る） ===== */
