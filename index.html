@@ -777,6 +777,132 @@
     padding: 10px 10px 4px;
     margin: -10px -10px 12px;
   }
+
+  /* ===== 目標達成グロー ===== */
+  .ring-card {
+    position: relative;
+  }
+  .ring-card.goal-glow::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 22px;
+    background: radial-gradient(circle, rgba(250,199,117,0.45), transparent 70%);
+    animation: ringGlowPulse 2.4s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .ring-card.goal-glow .ring-svg,
+  .ring-card.goal-glow .ring-info {
+    position: relative;
+    z-index: 1;
+  }
+  @keyframes ringGlowPulse {
+    0%, 100% { opacity: 0.55; transform: scale(1); }
+    50%      { opacity: 1;    transform: scale(1.06); }
+  }
+
+  /* ===== 今日の一言 ===== */
+  .quote-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--amber-light);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  .quote-icon { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+  .quote-title { font-size: 11px; font-weight: 700; color: var(--amber); margin-bottom: 3px; }
+  .quote-text { font-size: 13.5px; color: var(--text); line-height: 1.6; }
+
+  /* ===== ストリーク：カウントアップ用 ===== */
+  .streak-num { transition: none; }
+
+  /* ===== バッジ獲得モーダル ===== */
+  .badge-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    overflow: hidden;
+  }
+  .badge-modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .badge-modal-card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 36px 28px 28px;
+    text-align: center;
+    max-width: 300px;
+    width: calc(100% - 48px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    transform: scale(0.7);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.25s;
+    position: relative;
+    z-index: 2;
+  }
+  .badge-modal-overlay.open .badge-modal-card {
+    transform: scale(1);
+    opacity: 1;
+  }
+  .badge-modal-emoji {
+    font-size: 60px;
+    line-height: 1;
+    margin-bottom: 14px;
+  }
+  .badge-modal-overlay.open .badge-modal-emoji {
+    animation: badgeBounce 0.7s ease 0.15s;
+  }
+  @keyframes badgeBounce {
+    0%   { transform: translateY(0); }
+    30%  { transform: translateY(-14px); }
+    50%  { transform: translateY(0); }
+    70%  { transform: translateY(-6px); }
+    100% { transform: translateY(0); }
+  }
+  .badge-modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .badge-modal-sub { font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 22px; }
+  .badge-modal-close-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+  }
+  .confetti-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .badge-confetti-piece {
+    position: absolute;
+    top: -12px;
+    width: 8px;
+    height: 14px;
+    border-radius: 2px;
+    opacity: 0.9;
+    animation-name: confettiFall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(480px) rotate(540deg); opacity: 0; }
+  }
 </style>
 </head>
 <body>
@@ -902,14 +1028,24 @@
         </div>
       </div>
 
+      <div class="section" id="quote-section" style="display:none;">
+        <div class="quote-card">
+          <div class="quote-icon">💬</div>
+          <div>
+            <div class="quote-title">今日の一言</div>
+            <div class="quote-text" id="daily-quote-text"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="section">
         <div class="section-title">今日のカロリー（6月13日）</div>
-        <div class="ring-card">
+        <div class="ring-card" id="ring-card">
           <svg class="ring-svg" width="110" height="110" viewBox="0 0 110 110">
             <circle cx="55" cy="55" r="44" fill="none" stroke="#E8E6DF" stroke-width="10"/>
             <circle cx="55" cy="55" r="44" fill="none" stroke="#AFA9EC" stroke-width="10"
               stroke-dasharray="276" stroke-dashoffset="97"
-              stroke-linecap="round" transform="rotate(-90 55 55)"/>
+              stroke-linecap="round" transform="rotate(-90 55 55)" id="ring-progress-circle"/>
             <text x="55" y="48" text-anchor="middle" font-size="14" font-weight="700" fill="#534AB7">1,240</text>
             <text x="55" y="63" text-anchor="middle" font-size="11" fill="#888780">摂取 kcal</text>
             <text x="55" y="76" text-anchor="middle" font-size="11" fill="#1D9E75">▼ 目標内</text>
@@ -1032,11 +1168,11 @@
         <div class="section-title">継続記録 🔥</div>
         <div class="streak-card">
           <div>
-            <div class="streak-num">7</div>
+            <div class="streak-num" id="streak-num">7</div>
           </div>
           <div>
             <div class="streak-label">日連続で記録中！</div>
-            <div class="streak-sub">この調子で続けましょう 💪<br>10日達成でバッジがもらえます</div>
+            <div class="streak-sub" id="streak-sub">この調子で続けましょう 💪<br>10日達成でバッジがもらえます</div>
           </div>
         </div>
       </div>
@@ -1095,10 +1231,11 @@
         <div class="section">
           <div class="section-title">📷 AI解析結果</div>
           <div class="card">
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-              <span style="font-size:15px; font-weight:600; color:var(--text);">夕食の内容</span>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+              <span style="font-size:15px; font-weight:600; color:var(--text);" id="record-meal-type">🌆 夕食の内容</span>
               <span class="badge badge-green">確度 91%</span>
             </div>
+            <div style="font-size:12px; color:var(--text-hint); margin-bottom:12px;" id="record-datetime">7月1日(水) 19:24</div>
             <div class="meal-log-item">
               <div><div class="meal-name">ご飯（中盛り）</div><div class="meal-sub">約200g</div></div>
               <div class="meal-kcal">336 kcal</div>
@@ -1485,6 +1622,17 @@
     </div>
   </div>
 
+  <!-- バッジ獲得モーダル -->
+  <div class="badge-modal-overlay" id="badge-modal-overlay">
+    <div class="confetti-layer" id="confetti-layer"></div>
+    <div class="badge-modal-card">
+      <div class="badge-modal-emoji" id="badge-modal-emoji">🏆</div>
+      <div class="badge-modal-title" id="badge-modal-title">バッジ獲得</div>
+      <div class="badge-modal-sub" id="badge-modal-sub"></div>
+      <button class="badge-modal-close-btn" onclick="closeBadgeModal()">やった、続けます！</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -1557,9 +1705,31 @@
     setTimeout(() => switchTab('home'), 800);
   }
 
+  function formatMealDateTime() {
+    const days = ['日','月','火','水','木','金','土'];
+    const now = new Date();
+    const hh = now.getHours();
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    return {
+      text: `${now.getMonth() + 1}月${now.getDate()}日(${days[now.getDay()]}) ${hh}:${mm}`,
+      hh,
+    };
+  }
+
+  function getMealType(hh) {
+    if (hh >= 4 && hh < 11)  return { label: '朝食', icon: '🌅' };
+    if (hh >= 11 && hh < 15) return { label: '昼食', icon: '☀️' };
+    if (hh >= 15 && hh < 21) return { label: '夕食', icon: '🌆' };
+    return { label: '夜食', icon: '🌙' };
+  }
+
   function simulatePhoto() {
     showToast('📷 AI解析中...');
     setTimeout(() => {
+      const dt = formatMealDateTime();
+      const meal = getMealType(dt.hh);
+      document.getElementById('record-meal-type').textContent = meal.icon + ' ' + meal.label + 'の内容';
+      document.getElementById('record-datetime').textContent = dt.text;
       document.getElementById('photo-result').style.display = 'block';
       document.getElementById('photo-result').scrollIntoView({ behavior: 'smooth' });
     }, 1200);
@@ -1639,8 +1809,11 @@
       localStorage.setItem('dietMikkeUsageCount', String(count + 1));
     }
 
+    const mealLabel = document.getElementById('record-meal-type').textContent.replace(/^\S+\s/, '').replace('の内容', '');
+    const dt = document.getElementById('record-datetime').textContent;
     document.getElementById('photo-result').style.display = 'none';
-    showToast('✅ 夕食を記録しました！（624 kcal）');
+    showToast(`✅ ${dt} ${mealLabel}を記録しました！（624 kcal）`);
+    recordStreakOnConfirm();
     setTimeout(() => switchTab('home'), 900);
   }
 
@@ -1682,6 +1855,11 @@
       sub: '美容と体型を、無理なく整えていくプランです。',
       metric: { icon: '🍬', label: '間食', unit: '回', value: '1' },
       pfcFocus: 'carb',
+      dailyQuotes: [
+        '今日も記録できた、それだけで花丸です🌸',
+        '頑張りは、ちゃんと自分が見てくれています',
+        '完璧じゃなくていい、続けることが一番の魔法',
+      ],
       resultList: [
         { icon: '💄', text: '体型の変化とお肌の調子を一緒に見ていきます' },
         { icon: '🍚', text: '糖質バランスを中心に、食事のクセを可視化します' },
@@ -1699,6 +1877,11 @@
       sub: '更年期による代謝の変化に合わせた、やさしいプランです。',
       metric: { icon: '🥩', label: 'たんぱく質', unit: 'g', value: '46' },
       pfcFocus: 'protein',
+      dailyQuotes: [
+        '今日のあなたも、じゅうぶん頑張っています',
+        '無理しない日があってもいい、それも記録のうち',
+        '小さな一歩が、未来のあなたを変えていきます',
+      ],
       resultList: [
         { icon: '🌿', text: '代謝の変化に合わせて、PFCバランスを重視します' },
         { icon: '💭', text: '体調（気分）と食事の関係を一緒に振り返ります' },
@@ -1716,6 +1899,11 @@
       sub: '健康寿命とリバウンド防止を重視したプランです。',
       metric: { icon: '👣', label: '歩数', unit: '歩', value: '6,240' },
       pfcFocus: 'protein',
+      dailyQuotes: [
+        '今日も元気に歩けた、それが一番の宝物です',
+        '続けていること自体が、もう立派な習慣です',
+        '焦らず、あなたのペースで大丈夫です',
+      ],
       resultList: [
         { icon: '🚶', text: '歩数とたんぱく質量を中心に見ていきます' },
         { icon: '🍲', text: '無理なダイエットより、筋力維持を優先します' },
@@ -1733,6 +1921,11 @@
       sub: '筋トレ・減量を数値で管理したい方向けのプランです。',
       metric: { icon: '💪', label: '体脂肪目安', unit: '%', value: '18' },
       pfcFocus: 'protein',
+      dailyQuotes: [
+        '今日の積み重ねが、来月の結果になる',
+        'サボらず続けた、その事実がもう成果です',
+        '数字は嘘をつかない、記録を信じて進もう',
+      ],
       resultList: [
         { icon: '💪', text: 'たんぱく質量と体脂肪の目安を重視します' },
         { icon: '📊', text: '達成率を数値で表示し、進捗を管理します' },
@@ -1750,6 +1943,11 @@
       sub: '健康診断・メタボ対策を意識したプランです。',
       metric: { icon: '🧂', label: '塩分', unit: 'g', value: '6.8' },
       pfcFocus: 'fat',
+      dailyQuotes: [
+        '今日も記録できた、それが結果への第一歩です',
+        '言い訳せず続けている、それがもう強さです',
+        '淡々と続けることが、一番の近道です',
+      ],
       resultList: [
         { icon: '🩺', text: '塩分と脂質を中心にチェックします' },
         { icon: '📈', text: '体重の推移をグラフで淡々と可視化します' },
@@ -1767,6 +1965,11 @@
       sub: '生活習慣病予防を重視した、落ち着いたプランです。',
       metric: { icon: '🩸', label: '血圧目安', unit: '', value: '128/82' },
       pfcFocus: 'fat',
+      dailyQuotes: [
+        '今日も家族に安心をひとつ届けました',
+        '無理せず続ける、それが一番の健康法です',
+        '今日の記録が、これからの安心につながります',
+      ],
       resultList: [
         { icon: '🩸', text: '血圧・血糖値みっけとの連携も視野に入れられます' },
         { icon: '🧂', text: '塩分量を中心に、事実ベースで記録します' },
@@ -1784,6 +1987,10 @@
       sub: 'あなたのペースで、無理なく続けられるプランです。',
       metric: { icon: '👣', label: '歩数', unit: '歩', value: '6,240' },
       pfcFocus: null,
+      dailyQuotes: [
+        '今日も記録できました、その積み重ねが力になります',
+        '無理なく、あなたのペースで大丈夫です',
+      ],
       resultList: [
         { icon: '🌿', text: '写真・音声・バーコードで、手軽に記録できます' },
         { icon: '💭', text: '体調の記録から、あなたの傾向を見つけます' },
@@ -1904,6 +2111,151 @@
         label.appendChild(tag);
       }
     });
+
+    renderDailyQuote(seg);
+  }
+
+  /* ===== 今日の一言（セグメント別・日替わり） ===== */
+  function todayStr() {
+    const n = new Date();
+    return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+  }
+
+  function yesterdayStr() {
+    const n = new Date();
+    n.setDate(n.getDate() - 1);
+    return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+  }
+
+  function renderDailyQuote(seg) {
+    const quotes = (seg && seg.dailyQuotes && seg.dailyQuotes.length) ? seg.dailyQuotes : SEGMENTS.default.dailyQuotes;
+    const today = todayStr();
+    let seed = 0;
+    for (let i = 0; i < today.length; i++) seed += today.charCodeAt(i);
+    const quote = quotes[seed % quotes.length];
+    document.getElementById('daily-quote-text').textContent = quote;
+    document.getElementById('quote-section').style.display = 'block';
+  }
+
+  /* ===== 目標達成グロー（カロリーが目標内の日はリングが光る） ===== */
+  function applyRingGlow() {
+    const ring = document.getElementById('ring-card');
+    const circle = document.getElementById('ring-progress-circle');
+    ring.classList.add('goal-glow');
+    circle.setAttribute('stroke', '#FAC775');
+  }
+
+  /* ===== 継続記録ストリーク：カウントアップ＋バッジ ===== */
+  const STREAK_KEY = 'dietMikkeStreak';
+  const BADGE_KEY = 'dietMikkeBadgesEarned';
+  const STREAK_MILESTONES = [3, 7, 10, 14, 21, 30, 50, 100];
+  const BADGE_INFO = {
+    3:   { icon: '🌱', title: 'はじめの一歩バッジ' },
+    7:   { icon: '🔥', title: '一週間バッジ' },
+    10:  { icon: '💪', title: '継続の芽生えバッジ' },
+    14:  { icon: '🌿', title: '二週間バッジ' },
+    21:  { icon: '⭐', title: '習慣化バッジ' },
+    30:  { icon: '🏆', title: '継続の達人バッジ' },
+    50:  { icon: '💎', title: 'ダイヤモンドバッジ' },
+    100: { icon: '👑', title: 'レジェンドバッジ' },
+  };
+
+  function getStreakData() {
+    let data = JSON.parse(localStorage.getItem(STREAK_KEY) || 'null');
+    if (!data) {
+      data = { count: 7, lastDate: yesterdayStr() };
+      localStorage.setItem(STREAK_KEY, JSON.stringify(data));
+    }
+    return data;
+  }
+
+  function getEarnedBadges() {
+    return JSON.parse(localStorage.getItem(BADGE_KEY) || '[]');
+  }
+
+  function nextMilestone(count) {
+    for (const m of STREAK_MILESTONES) { if (m > count) return m; }
+    return null;
+  }
+
+  function animateCountUp(elId, target) {
+    const el = document.getElementById(elId);
+    const duration = 700;
+    const start = performance.now();
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(eased * target);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = target;
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  function renderStreak() {
+    const data = getStreakData();
+    animateCountUp('streak-num', data.count);
+    const next = nextMilestone(data.count);
+    const subEl = document.getElementById('streak-sub');
+    if (next) {
+      subEl.innerHTML = 'この調子で続けましょう 💪<br>' + next + '日達成でバッジがもらえます';
+    } else {
+      subEl.innerHTML = 'すべてのバッジを達成しました 👑<br>これからも一緒に続けましょう';
+    }
+  }
+
+  function recordStreakOnConfirm() {
+    const data = getStreakData();
+    const today = todayStr();
+    if (data.lastDate === today) return;
+
+    const yest = yesterdayStr();
+    data.count = (data.lastDate === yest) ? data.count + 1 : 1;
+    data.lastDate = today;
+    localStorage.setItem(STREAK_KEY, JSON.stringify(data));
+
+    renderStreak();
+    maybeCelebrateBadge(data.count);
+  }
+
+  function maybeCelebrateBadge(count) {
+    if (!STREAK_MILESTONES.includes(count)) return;
+    const earned = getEarnedBadges();
+    if (earned.includes(count)) return;
+    earned.push(count);
+    localStorage.setItem(BADGE_KEY, JSON.stringify(earned));
+    showBadgeModal(count);
+  }
+
+  function spawnConfetti() {
+    const layer = document.getElementById('confetti-layer');
+    layer.innerHTML = '';
+    const colors = ['#534AB7', '#AFA9EC', '#1D9E75', '#FAC775'];
+    for (let i = 0; i < 26; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'badge-confetti-piece';
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDuration = (1.6 + Math.random() * 0.9) + 's';
+      piece.style.animationDelay = (Math.random() * 0.3) + 's';
+      layer.appendChild(piece);
+    }
+  }
+
+  function showBadgeModal(count) {
+    const info = BADGE_INFO[count] || { icon: '🏅', title: count + '日達成バッジ' };
+    document.getElementById('badge-modal-emoji').textContent = info.icon;
+    document.getElementById('badge-modal-title').textContent = info.title;
+    document.getElementById('badge-modal-sub').textContent = count + '日連続で記録できました。よくがんばりました！';
+    spawnConfetti();
+    document.getElementById('badge-modal-overlay').classList.add('open');
+  }
+
+  function closeBadgeModal() {
+    document.getElementById('badge-modal-overlay').classList.remove('open');
   }
 
   (function initOnboarding() {
@@ -1914,6 +2266,8 @@
     } else {
       document.body.style.overflow = 'hidden';
     }
+    renderStreak();
+    applyRingGlow();
   })();
 </script>
 </body>
