@@ -981,6 +981,12 @@
             <div class="onb-option-title">60〜70代</div>
           </div>
         </div>
+        <div class="onb-option" onclick="onbSelectAge('80_90', this)">
+          <div class="onb-option-icon">🌸</div>
+          <div class="onb-option-text">
+            <div class="onb-option-title">80〜90代</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1052,10 +1058,10 @@
           </svg>
           <div class="ring-info">
             <div class="ring-remaining">360</div>
-            <div class="ring-label">あと <b>kcal</b> 食べられます</div>
+            <div class="ring-label" id="ring-label">あと <b>kcal</b> 食べられます</div>
             <div class="ring-total">目標：1,600 kcal / 日</div>
             <div style="margin-top: 10px;">
-              <div class="badge badge-green">✓ 目標達成まであと少し</div>
+              <div class="badge badge-green" id="ring-status-badge">✓ 目標達成まであと少し</div>
             </div>
           </div>
         </div>
@@ -1981,6 +1987,54 @@
         '体調の記録から見ると、無理のないペースで続けられています。今のリズムのままで大丈夫です。',
       ],
     },
+    female_80_90: {
+      badge: '80〜90代 女性プラン',
+      catch: '「しっかり食べて、今日も元気に」',
+      sub: '体重を減らすことより、しっかり食べられているかを大切にするプランです。',
+      metric: { icon: '🍽️', label: '今日の食事回数', unit: '回', value: '3' },
+      pfcFocus: 'protein',
+      ringLabelOverride: '今日も、しっかり食べられています',
+      ringBadgeOverride: '✓ 順調です',
+      dailyQuotes: [
+        '今日もしっかり食べられた、それが一番の元気の源です',
+        '減らすより、しっかり食べる。それが今のあなたに大切なことです',
+        'ご家族と一緒に、無理のないペースで続けましょう',
+      ],
+      resultList: [
+        { icon: '🍽️', text: '体重を減らすことより、きちんと食べられているかを大切にします' },
+        { icon: '🥩', text: 'たんぱく質を中心に、必要な栄養がとれているか見ていきます' },
+        { icon: '👨‍👩‍👧', text: 'ご家族と一緒に記録する使い方にも対応しています' },
+      ],
+      tips: [
+        '今週はしっかり3食召し上がれていますね。この調子で、無理なく続けていきましょう。',
+        '体重が少し減っています。しっかり食べられているか、次の食事で意識してみてください。',
+        'たんぱく質が摂れている日は、体の元気も違ってきます。お肉やお魚、豆腐を意識してみましょう。',
+      ],
+    },
+    male_80_90: {
+      badge: '80〜90代 男性プラン',
+      catch: '「痩せるより、しっかり食べて元気に」',
+      sub: '体重維持と栄養をしっかりとることを大切にするプランです。',
+      metric: { icon: '🍽️', label: '今日の食事回数', unit: '回', value: '3' },
+      pfcFocus: 'protein',
+      ringLabelOverride: '今日も、しっかり食べられています',
+      ringBadgeOverride: '✓ 順調です',
+      dailyQuotes: [
+        '今日もしっかり食べられました、それが一番の元気の源です',
+        '減らすことより、しっかり食べることを大切にしましょう',
+        '今日の記録が、これからの元気につながります',
+      ],
+      resultList: [
+        { icon: '🍚', text: 'カロリー制限より、しっかり食べることを優先します' },
+        { icon: '🥩', text: 'たんぱく質を中心に、必要な栄養がとれているか見ていきます' },
+        { icon: '🩺', text: '血圧みっけ・血糖値みっけとの連携も視野に入れられます' },
+      ],
+      tips: [
+        '今週はしっかり食事がとれています。この調子を維持していきましょう。',
+        '体重の減少が続くと、体力低下につながりやすくなります。次の食事は、いつもより一品多めを意識してみてください。',
+        'たんぱく質をしっかりとれた日は、記録にも表れています。よい状態です。',
+      ],
+    },
     default: {
       badge: 'あなた専用プラン',
       catch: '「考えるを、ひとりにしない」',
@@ -2095,6 +2149,19 @@
       document.getElementById('summary-metric-val').textContent = seg.metric.value;
       document.getElementById('summary-metric-unit').textContent = seg.metric.unit;
       document.getElementById('summary-metric-label').textContent = seg.metric.icon + ' ' + seg.metric.label;
+    }
+
+    const ringLabelEl = document.getElementById('ring-label');
+    const ringBadgeEl = document.getElementById('ring-status-badge');
+    if (seg.ringLabelOverride) {
+      ringLabelEl.textContent = seg.ringLabelOverride;
+    } else {
+      ringLabelEl.innerHTML = 'あと <b>kcal</b> 食べられます';
+    }
+    if (seg.ringBadgeOverride) {
+      ringBadgeEl.textContent = seg.ringBadgeOverride;
+    } else {
+      ringBadgeEl.textContent = '✓ 目標達成まであと少し';
     }
 
     ['protein', 'fat', 'carb'].forEach(k => {
