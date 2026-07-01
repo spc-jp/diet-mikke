@@ -590,9 +590,289 @@
     margin-top: 12px;
     background: var(--gray-900);
   }
+
+  /* ===== 診断オンボーディング ===== */
+  .onb-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: var(--bg);
+    display: flex;
+    justify-content: center;
+  }
+  .onb-wrap {
+    width: 100%;
+    max-width: 420px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .onb-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px 8px;
+    min-height: 44px;
+  }
+  .onb-back {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    color: var(--text-sub);
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .onb-dots { display: flex; gap: 6px; flex: 1; }
+  .onb-dot { flex: 1; height: 4px; border-radius: 99px; background: var(--gray-200); transition: background 0.2s; }
+  .onb-dot.done { background: var(--primary); }
+  .onb-step {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    padding: 8px 24px 32px;
+  }
+  .onb-step.active { display: flex; }
+  .onb-emoji { font-size: 48px; line-height: 1; margin: 12px 0 18px; }
+  .onb-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .onb-sub {
+    font-size: 14px;
+    color: var(--text-sub);
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+  .onb-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .onb-option {
+    width: 100%;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  }
+  .onb-option:active { transform: scale(0.98); }
+  .onb-option.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+  .onb-option-icon { font-size: 26px; flex-shrink: 0; }
+  .onb-option-text { flex: 1; }
+  .onb-option-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .onb-option-desc { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
+  .onb-spacer { flex: 1; }
+  .onb-footer { margin-top: auto; padding-top: 24px; }
+  .onb-skip {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-hint);
+    margin-top: 16px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* 結果ステップ */
+  .onb-result-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 99px;
+    margin-bottom: 14px;
+    width: fit-content;
+  }
+  .onb-result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    margin-top: 4px;
+  }
+  .onb-result-row {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .onb-result-row:last-child { border-bottom: none; }
+  .onb-result-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
+  .onb-result-text { font-size: 13.5px; color: var(--text); line-height: 1.6; }
+
+  /* ホーム画面の専用プランバナー */
+  .plan-banner {
+    background: linear-gradient(135deg, var(--primary) 0%, #6E63D6 100%);
+    border-radius: 18px;
+    padding: 16px 18px;
+    color: white;
+    margin-bottom: 4px;
+  }
+  .plan-banner-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .plan-banner-badge {
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 10px;
+    border-radius: 99px;
+  }
+  .plan-banner-edit {
+    font-size: 11px;
+    color: rgba(255,255,255,0.85);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .plan-banner-catch {
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .plan-banner-sub {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 4px;
+    line-height: 1.6;
+  }
+  .pfc-focus-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .pfc-row.focus {
+    background: var(--primary-light);
+    border-radius: 12px;
+    padding: 10px 10px 4px;
+    margin: -10px -10px 12px;
+  }
 </style>
 </head>
 <body>
+
+<!-- ========== 診断オンボーディング ========== -->
+<div class="onb-overlay" id="onb-overlay">
+  <div class="onb-wrap">
+
+    <div class="onb-topbar">
+      <div class="onb-back" id="onb-back-btn" onclick="onbBack()" style="visibility:hidden;">←</div>
+      <div class="onb-dots">
+        <div class="onb-dot" id="onb-dot-1"></div>
+        <div class="onb-dot" id="onb-dot-2"></div>
+        <div class="onb-dot" id="onb-dot-3"></div>
+      </div>
+    </div>
+
+    <!-- STEP1 イントロ -->
+    <div class="onb-step active" id="onb-step-1">
+      <div class="onb-emoji">🌿</div>
+      <div class="onb-title">はじめまして。<br>あなた専用のプランを<br>つくります。</div>
+      <div class="onb-sub">性別と年代をひとつずつ教えてください。あなたに合った続け方をご提案します。所要時間は30秒ほどです。</div>
+      <div class="onb-spacer"></div>
+      <div class="onb-footer">
+        <button class="btn-primary" onclick="onbGoto(2)">はじめる</button>
+        <div class="onb-skip" onclick="onbSkip()">診断せずに使ってみる</div>
+      </div>
+    </div>
+
+    <!-- STEP2 性別 -->
+    <div class="onb-step" id="onb-step-2">
+      <div class="onb-title">性別を教えてください</div>
+      <div class="onb-sub">続けやすい伝え方やメニューの調整に使います。</div>
+      <div class="onb-options">
+        <div class="onb-option" onclick="onbSelectGender('female', this)">
+          <div class="onb-option-icon">👩</div>
+          <div class="onb-option-text">
+            <div class="onb-option-title">女性</div>
+          </div>
+        </div>
+        <div class="onb-option" onclick="onbSelectGender('male', this)">
+          <div class="onb-option-icon">👨</div>
+          <div class="onb-option-text">
+            <div class="onb-option-title">男性</div>
+          </div>
+        </div>
+        <div class="onb-option" onclick="onbSelectGender('none', this)">
+          <div class="onb-option-icon">🙂</div>
+          <div class="onb-option-text">
+            <div class="onb-option-title">回答しない</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP3 年代 -->
+    <div class="onb-step" id="onb-step-3">
+      <div class="onb-title">年代を教えてください</div>
+      <div class="onb-sub">体の変化に合わせて、重視するポイントを変えます。</div>
+      <div class="onb-options">
+        <div class="onb-option" onclick="onbSelectAge('20_30', this)">
+          <div class="onb-option-icon">🌱</div>
+          <div class="onb-option-text">
+            <div class="onb-option-title">20〜30代</div>
+          </div>
+        </div>
+        <div class="onb-option" onclick="onbSelectAge('40_50', this)">
+          <div class="onb-option-icon">🌿</div>
+          <div class="onb-option-text">
+            <div class="onb-option-title">40〜50代</div>
+          </div>
+        </div>
+        <div class="onb-option" onclick="onbSelectAge('60_70', this)">
+          <div class="onb-option-icon">🌳</div>
+          <div class="onb-option-text">
+            <div class="onb-option-title">60〜70代</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP4 結果 -->
+    <div class="onb-step" id="onb-step-4">
+      <div class="onb-result-badge">✓ 診断結果</div>
+      <div class="onb-title" id="onb-result-title">あなた専用プランが<br>できました</div>
+      <div class="onb-sub" id="onb-result-catch">-</div>
+      <div class="onb-result-card" id="onb-result-list"></div>
+      <div class="onb-spacer"></div>
+      <div class="onb-footer">
+        <button class="btn-primary" onclick="onbFinish()">このプランではじめる</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div class="app" id="app">
 
   <!-- ステータスバー -->
@@ -610,6 +890,17 @@
       </div>
     </div>
     <div class="content">
+
+      <div class="section" id="plan-banner-section" style="display:none;">
+        <div class="plan-banner">
+          <div class="plan-banner-top">
+            <span class="plan-banner-badge" id="plan-banner-badge">あなた専用プラン</span>
+            <span class="plan-banner-edit" onclick="onbReopen()">変更する</span>
+          </div>
+          <div class="plan-banner-catch" id="plan-banner-catch"></div>
+          <div class="plan-banner-sub" id="plan-banner-sub"></div>
+        </div>
+      </div>
 
       <div class="section">
         <div class="section-title">今日のカロリー（6月13日）</div>
@@ -639,10 +930,10 @@
       <div class="section">
         <div class="section-title">今日のまとめ</div>
         <div class="summary-grid">
-          <div class="summary-item">
-            <div class="summary-val">6,240</div>
-            <div class="summary-unit">歩</div>
-            <div class="summary-label">👣 歩数</div>
+          <div class="summary-item" id="summary-metric-slot">
+            <div class="summary-val" id="summary-metric-val">6,240</div>
+            <div class="summary-unit" id="summary-metric-unit">歩</div>
+            <div class="summary-label" id="summary-metric-label">👣 歩数</div>
           </div>
           <div class="summary-item" id="mood-summary" style="cursor:pointer;" onclick="switchTab('mood')">
             <div class="summary-val" style="font-size:28px;" id="today-mood-icon">😊</div>
@@ -662,25 +953,25 @@
       <div class="section">
         <div class="section-title">栄養バランス（PFC）</div>
         <div class="card">
-          <div class="pfc-row">
+          <div class="pfc-row" id="pfc-row-protein">
             <div class="pfc-label-row">
-              <span>🥩 たんぱく質</span><span>58g / 60g</span>
+              <span id="pfc-label-protein">🥩 たんぱく質</span><span>58g / 60g</span>
             </div>
             <div class="pfc-track">
               <div class="pfc-fill" style="width: 97%; background: #9FE1CB;"></div>
             </div>
           </div>
-          <div class="pfc-row">
+          <div class="pfc-row" id="pfc-row-fat">
             <div class="pfc-label-row">
-              <span>🧈 脂質</span><span>38g / 50g</span>
+              <span id="pfc-label-fat">🧈 脂質</span><span>38g / 50g</span>
             </div>
             <div class="pfc-track">
               <div class="pfc-fill" style="width: 76%; background: #FAC775;"></div>
             </div>
           </div>
-          <div class="pfc-row" style="margin-bottom:0;">
+          <div class="pfc-row" id="pfc-row-carb" style="margin-bottom:0;">
             <div class="pfc-label-row">
-              <span>🍚 炭水化物</span><span>165g / 200g</span>
+              <span id="pfc-label-carb">🍚 炭水化物</span><span>165g / 200g</span>
             </div>
             <div class="pfc-track">
               <div class="pfc-fill" style="width: 83%; background: #AFA9EC;"></div>
@@ -951,8 +1242,7 @@
             <div class="insight-card">
               <div class="insight-label">🤖 AIの気づき</div>
               <div class="insight-text" id="ai-insight">
-                疲れを感じた日の翌日は、間食が増える傾向があります。<br>
-                疲れたときは無理せず、スープや温かい飲み物で気持ちを整えてみましょう。
+                写真や音声で記録を続けていくと、ここにあなたの傾向が表示されます。
               </div>
             </div>
           </div>
@@ -1383,6 +1673,248 @@
   function closeHelpOutside(e) {
     if (e.target === document.getElementById('help-modal')) closeHelp();
   }
+
+  /* ===== 診断オンボーディング（性別×年代） ===== */
+  const SEGMENTS = {
+    female_20_30: {
+      badge: '20〜30代 女性プラン',
+      catch: '「頑張りを、ちゃんと自分で認めてあげよう」',
+      sub: '美容と体型を、無理なく整えていくプランです。',
+      metric: { icon: '🍬', label: '間食', unit: '回', value: '1' },
+      pfcFocus: 'carb',
+      resultList: [
+        { icon: '💄', text: '体型の変化とお肌の調子を一緒に見ていきます' },
+        { icon: '🍚', text: '糖質バランスを中心に、食事のクセを可視化します' },
+        { icon: '📸', text: '写真記録で、頑張りを見える化していきます' },
+      ],
+      tips: [
+        '間食が増えた日は、無理に我慢せず「量」を少しだけ見直すのがおすすめです。糖質バランスを意識すると、翌日の体の軽さが変わってきます。',
+        '写真で記録できた日が続いていますね。続けられていること自体が、もう十分な頑張りです。',
+        '体調が「疲れた」の日は、間食が増える傾向があります。甘いものより、温かい飲み物を選んでみましょう。',
+      ],
+    },
+    female_40_50: {
+      badge: '40〜50代 女性プラン',
+      catch: '「無理しない。自分を責めない。」',
+      sub: '更年期による代謝の変化に合わせた、やさしいプランです。',
+      metric: { icon: '🥩', label: 'たんぱく質', unit: 'g', value: '46' },
+      pfcFocus: 'protein',
+      resultList: [
+        { icon: '🌿', text: '代謝の変化に合わせて、PFCバランスを重視します' },
+        { icon: '💭', text: '体調（気分）と食事の関係を一緒に振り返ります' },
+        { icon: '📉', text: '厳しい目標ではなく、続けられるペースを大切にします' },
+      ],
+      tips: [
+        'このところ体重の変化が緩やかですが、これは自然なことです。数字より、続けられているかどうかを見てあげましょう。',
+        '疲れを感じた日の翌日は、食事量が増える傾向があります。無理せず、温かいスープなどで気持ちを整えてみてください。',
+        'PFCバランスの中でも、たんぱく質が少し不足気味です。次の食事に、豆腐や卵を一品足してみましょう。',
+      ],
+    },
+    female_60_70: {
+      badge: '60〜70代 女性プラン',
+      catch: '「元気に歩ける体を、これからも」',
+      sub: '健康寿命とリバウンド防止を重視したプランです。',
+      metric: { icon: '👣', label: '歩数', unit: '歩', value: '6,240' },
+      pfcFocus: 'protein',
+      resultList: [
+        { icon: '🚶', text: '歩数とたんぱく質量を中心に見ていきます' },
+        { icon: '🍲', text: '無理なダイエットより、筋力維持を優先します' },
+        { icon: '💬', text: '体調の記録から、無理のないペースをご提案します' },
+      ],
+      tips: [
+        '今週は歩数がしっかり確保できています。この調子で、筋力を保っていきましょう。',
+        'たんぱく質が不足すると、体力の低下につながりやすくなります。お肉やお魚、卵を毎食どれかひとつ意識してみてください。',
+        '体重を減らすことより、今の元気を保つことを優先していきましょう。',
+      ],
+    },
+    male_20_30: {
+      badge: '20〜30代 男性プラン',
+      catch: '「数字で管理する、成果につながる記録」',
+      sub: '筋トレ・減量を数値で管理したい方向けのプランです。',
+      metric: { icon: '💪', label: '体脂肪目安', unit: '%', value: '18' },
+      pfcFocus: 'protein',
+      resultList: [
+        { icon: '💪', text: 'たんぱく質量と体脂肪の目安を重視します' },
+        { icon: '📊', text: '達成率を数値で表示し、進捗を管理します' },
+        { icon: '🔥', text: 'カロリー収支をシビアに可視化します' },
+      ],
+      tips: [
+        '今週のたんぱく質摂取量は目標にあと一歩です。トレーニング後の食事で、プロテインや鶏胸肉を意識しましょう。',
+        'カロリー収支は順調です。このペースを維持できれば、来週には数値の変化が見えてくるはずです。',
+        '休養日にカロリーが増える傾向があります。オフの日こそ、記録を続けることが成果につながります。',
+      ],
+    },
+    male_40_50: {
+      badge: '40〜50代 男性プラン',
+      catch: '「結果を、言い訳せずに見る」',
+      sub: '健康診断・メタボ対策を意識したプランです。',
+      metric: { icon: '🧂', label: '塩分', unit: 'g', value: '6.8' },
+      pfcFocus: 'fat',
+      resultList: [
+        { icon: '🩺', text: '塩分と脂質を中心にチェックします' },
+        { icon: '📈', text: '体重の推移をグラフで淡々と可視化します' },
+        { icon: '🍶', text: '飲酒・外食が多い方でも続けやすい記録方法です' },
+      ],
+      tips: [
+        '外食が続いた週は、塩分と脂質が増える傾向にあります。次の食事は、汁物を少なめにするだけでも変わります。',
+        '体重の推移はほぼ横ばいです。数値が動かない時期こそ、記録を止めないことが大切です。',
+        '飲酒があった日は、翌日のカロリーが高くなりがちです。おつまみを低カロリーなものに変えるだけで差が出ます。',
+      ],
+    },
+    male_60_70: {
+      badge: '60〜70代 男性プラン',
+      catch: '「家族に心配をかけない体づくりを」',
+      sub: '生活習慣病予防を重視した、落ち着いたプランです。',
+      metric: { icon: '🩸', label: '血圧目安', unit: '', value: '128/82' },
+      pfcFocus: 'fat',
+      resultList: [
+        { icon: '🩸', text: '血圧・血糖値みっけとの連携も視野に入れられます' },
+        { icon: '🧂', text: '塩分量を中心に、事実ベースで記録します' },
+        { icon: '🚶', text: '無理のない範囲で、歩数を維持していきます' },
+      ],
+      tips: [
+        '塩分量がやや多めの日が続いています。味付けの濃い日が続いたら、次の食事で調整してみましょう。',
+        '歩数は安定して確保できています。この習慣を、これからも大切にしてください。',
+        '体調の記録から見ると、無理のないペースで続けられています。今のリズムのままで大丈夫です。',
+      ],
+    },
+    default: {
+      badge: 'あなた専用プラン',
+      catch: '「考えるを、ひとりにしない」',
+      sub: 'あなたのペースで、無理なく続けられるプランです。',
+      metric: { icon: '👣', label: '歩数', unit: '歩', value: '6,240' },
+      pfcFocus: null,
+      resultList: [
+        { icon: '🌿', text: '写真・音声・バーコードで、手軽に記録できます' },
+        { icon: '💭', text: '体調の記録から、あなたの傾向を見つけます' },
+        { icon: '📈', text: '無理のないペースで、続けることを大切にします' },
+      ],
+      tips: [
+        '写真や音声で記録を続けていくと、ここにあなたの傾向が表示されます。まずは記録を続けてみましょう。',
+      ],
+    },
+  };
+
+  let onbGender = null;
+  let onbAge = null;
+  const ONB_STORAGE_KEY = 'dietMikkeSegment';
+
+  function onbSegmentKey(gender, age) {
+    if (!gender || gender === 'none' || !age) return 'default';
+    const key = gender + '_' + age;
+    return SEGMENTS[key] ? key : 'default';
+  }
+
+  let onbCurrentStep = 1;
+
+  function onbUpdateDots(step) {
+    for (let i = 1; i <= 3; i++) {
+      document.getElementById('onb-dot-' + i).classList.toggle('done', i <= step);
+    }
+  }
+
+  function onbGoto(step) {
+    onbCurrentStep = step;
+    document.querySelectorAll('.onb-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('onb-step-' + step).classList.add('active');
+    document.getElementById('onb-back-btn').style.visibility = step === 1 ? 'hidden' : 'visible';
+    onbUpdateDots(step - 1 >= 0 ? step - 1 : 0);
+  }
+
+  function onbBack() {
+    if (onbCurrentStep > 1) onbGoto(onbCurrentStep - 1);
+  }
+
+  function onbSelectGender(gender, el) {
+    onbGender = gender;
+    el.parentElement.querySelectorAll('.onb-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    setTimeout(() => onbGoto(3), 220);
+  }
+
+  function onbSelectAge(age, el) {
+    onbAge = age;
+    el.parentElement.querySelectorAll('.onb-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    setTimeout(() => {
+      onbShowResult();
+      onbGoto(4);
+    }, 220);
+  }
+
+  function onbShowResult() {
+    const key = onbSegmentKey(onbGender, onbAge);
+    const seg = SEGMENTS[key];
+    document.getElementById('onb-result-catch').textContent = seg.catch;
+    document.getElementById('onb-result-list').innerHTML = seg.resultList.map(r =>
+      `<div class="onb-result-row"><div class="onb-result-icon">${r.icon}</div><div class="onb-result-text">${r.text}</div></div>`
+    ).join('');
+  }
+
+  function onbSkip() {
+    onbGender = 'none';
+    onbAge = null;
+    onbFinish();
+  }
+
+  function onbFinish() {
+    const key = onbSegmentKey(onbGender, onbAge);
+    localStorage.setItem(ONB_STORAGE_KEY, key);
+    applySegment(key);
+    document.getElementById('onb-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function onbReopen() {
+    onbGoto(1);
+    document.getElementById('onb-overlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function applySegment(key) {
+    const seg = SEGMENTS[key] || SEGMENTS.default;
+    document.getElementById('plan-banner-section').style.display = 'block';
+    document.getElementById('plan-banner-badge').textContent = seg.badge;
+    document.getElementById('plan-banner-catch').textContent = seg.catch;
+    document.getElementById('plan-banner-sub').textContent = seg.sub;
+
+    const insightEl = document.getElementById('ai-insight');
+    if (seg.tips && seg.tips.length) {
+      const tip = seg.tips[Math.floor(Math.random() * seg.tips.length)];
+      insightEl.textContent = tip;
+    }
+
+    if (seg.metric) {
+      document.getElementById('summary-metric-val').textContent = seg.metric.value;
+      document.getElementById('summary-metric-unit').textContent = seg.metric.unit;
+      document.getElementById('summary-metric-label').textContent = seg.metric.icon + ' ' + seg.metric.label;
+    }
+
+    ['protein', 'fat', 'carb'].forEach(k => {
+      const row = document.getElementById('pfc-row-' + k);
+      const label = document.getElementById('pfc-label-' + k);
+      row.classList.remove('focus');
+      const existingTag = label.querySelector('.pfc-focus-tag');
+      if (existingTag) existingTag.remove();
+      if (seg.pfcFocus === k) {
+        row.classList.add('focus');
+        const tag = document.createElement('span');
+        tag.className = 'pfc-focus-tag';
+        tag.textContent = '今週の重点';
+        label.appendChild(tag);
+      }
+    });
+  }
+
+  (function initOnboarding() {
+    const saved = localStorage.getItem(ONB_STORAGE_KEY);
+    if (saved && SEGMENTS[saved]) {
+      document.getElementById('onb-overlay').style.display = 'none';
+      applySegment(saved);
+    } else {
+      document.body.style.overflow = 'hidden';
+    }
+  })();
 </script>
 </body>
 </html>
