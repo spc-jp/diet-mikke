@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>ダイエットみっけ</title>
 <link rel="icon" href="https://spc-jp.github.io/diet-mikke/favicon.png" type="image/png">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="ダイエットみっけ｜写真・音声で続くダイエット記録アプリ">
+<meta property="og:description" content="写真・音声・バーコードでサッと記録。AIが気づきをくれる、続けやすいダイエットアプリです。">
+<meta property="og:url" content="https://spc-jp.github.io/diet-mikke/">
+<meta property="og:image" content="https://spc-jp.github.io/diet-mikke/ogp.png">
+<meta property="og:site_name" content="ダイエットみっけ">
+<meta property="og:locale" content="ja_JP">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ダイエットみっけ｜写真・音声で続くダイエット記録アプリ">
+<meta name="twitter:description" content="写真・音声・バーコードでサッと記録。AIが気づきをくれる、続けやすいダイエットアプリです。">
+<meta name="twitter:image" content="https://spc-jp.github.io/diet-mikke/ogp.png">
+
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -512,6 +526,70 @@
   .badge-amber  { background: var(--amber-light); color: var(--amber); }
 
   .divider { height: 8px; }
+
+  /* 購入・パスワード解除モーダル */
+  .paywall-desc {
+    font-size: 14px;
+    color: var(--text-sub);
+    line-height: 1.7;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .paywall-price {
+    text-align: center;
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 14px 0 4px;
+  }
+  .paywall-price span {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-sub);
+    margin-left: 4px;
+  }
+  .paywall-buy-btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+  }
+  .paywall-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 20px 14px;
+    color: var(--text-hint);
+    font-size: 12px;
+  }
+  .paywall-divider::before,
+  .paywall-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .password-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--card);
+    outline: none;
+  }
+  .password-input:focus { border-color: var(--primary); }
+  .password-error {
+    display: none;
+    color: var(--red);
+    font-size: 13px;
+    text-align: center;
+    margin-top: 8px;
+  }
+  .password-unlock-btn {
+    margin-top: 12px;
+    background: var(--gray-900);
+  }
 </style>
 </head>
 <body>
@@ -1089,6 +1167,34 @@
     </div>
   </div>
 
+  <!-- 購入・パスワード解除モーダル -->
+  <div class="modal-overlay" id="paywall-modal" onclick="closePaywallOutside(event)">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <span class="modal-title">🌿 続きは購入後にご利用いただけます</span>
+        <button class="modal-close" onclick="closePaywall()">✕</button>
+      </div>
+
+      <div style="padding: 20px 0 0;">
+        <div class="paywall-desc">無料で3回まで記録をお試しいただけました。<br>この先も使い続けるには、買い切り680円でアプリを解放できます。</div>
+        <div class="paywall-price">¥680<span>買い切り・追加料金なし</span></div>
+
+        <div style="padding: 0 20px;">
+          <a href="https://buy.stripe.com/3cIeVcayS1EN6SPdZicV214" target="_blank" rel="noopener" class="btn-primary paywall-buy-btn">購入して続きを使う</a>
+        </div>
+
+        <div class="paywall-divider">すでに購入済みの方</div>
+
+        <div style="padding: 0 20px 24px;">
+          <input type="text" id="password-input" class="password-input" placeholder="パスワードを入力" autocomplete="off">
+          <div class="password-error" id="password-error">パスワードが違います。もう一度お試しください。</div>
+          <button class="btn-primary password-unlock-btn" onclick="verifyPassword()">解除する</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -1181,7 +1287,68 @@
     showToast('✏️ 食品名で検索できます');
   }
 
+  /* ===== 有料化ロジック（3回無料 → 買い切り680円） ===== */
+  const WORKER_URL = 'https://diet-mikke.yymmatsu.workers.dev';
+  const FREE_LIMIT = 3;
+
+  function getUsageCount() {
+    return parseInt(localStorage.getItem('dietMikkeUsageCount') || '0', 10);
+  }
+  function isUnlocked() {
+    return localStorage.getItem('dietMikkeUnlocked') === 'true';
+  }
+  function openPaywall() {
+    document.getElementById('paywall-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closePaywall() {
+    document.getElementById('paywall-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function closePaywallOutside(e) {
+    if (e.target === document.getElementById('paywall-modal')) closePaywall();
+  }
+
+  async function verifyPassword() {
+    const input = document.getElementById('password-input');
+    const errorEl = document.getElementById('password-error');
+    const pw = input.value.trim();
+    if (!pw) return;
+
+    errorEl.style.display = 'none';
+
+    try {
+      const res = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw })
+      });
+      const data = await res.json();
+
+      if (data.valid) {
+        localStorage.setItem('dietMikkeUnlocked', 'true');
+        closePaywall();
+        showToast('🎉 購入ありがとうございます！すべての機能が使えるようになりました');
+      } else {
+        errorEl.textContent = 'パスワードが違います。もう一度お試しください。';
+        errorEl.style.display = 'block';
+      }
+    } catch (e) {
+      errorEl.textContent = '通信エラーが発生しました。時間をおいて再度お試しください。';
+      errorEl.style.display = 'block';
+    }
+  }
+
   function confirmRecord() {
+    if (!isUnlocked()) {
+      const count = getUsageCount();
+      if (count >= FREE_LIMIT) {
+        openPaywall();
+        return;
+      }
+      localStorage.setItem('dietMikkeUsageCount', String(count + 1));
+    }
+
     document.getElementById('photo-result').style.display = 'none';
     showToast('✅ 夕食を記録しました！（624 kcal）');
     setTimeout(() => switchTab('home'), 900);
